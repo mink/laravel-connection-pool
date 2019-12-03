@@ -5,6 +5,8 @@
         }
     },
     "require": {
+        "php": "^7.4",
+        "ext-swoole": "*",
         "illuminate/database": "^6.6"
     }
 }
