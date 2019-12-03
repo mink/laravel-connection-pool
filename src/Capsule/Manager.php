@@ -16,9 +16,7 @@ class Manager extends BaseManager
         {
             if(!$connection->isActive())
             {
-                $con = $this->manager->connection($connection->getName());
-
-                return $con;
+                return $this->manager->connection($connection->getName());
             }
         }
     }
@@ -34,18 +32,20 @@ class Manager extends BaseManager
     {
         for($i = 0; $i < $amount; $i++)
         {
-            $config['name'] = $name . '-' . ($i + 1);
+            $connectionName = $name . '-' . ($i + 1);
 
-            $this->addConnection($config, $name . '-' . ($i + 1));
+            $config['name'] = $connectionName;
+
+            $this->addConnection($config, $connectionName);
 
             if($i == 0)
             {
-                $this->getDatabaseManager()->setDefaultConnection($name . '-' . ($i + 1));
+                $this->getDatabaseManager()->setDefaultConnection($connectionName);
             }
 
             // todo - refactor
-            go(function() use($name, $i) {
-               $this->getConnection($name . '-' . ($i + 1)) ;
+            go(function() use($connectionName) {
+               $this->getConnection($connectionName) ;
             });
         }
 
