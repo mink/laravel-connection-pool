@@ -2,6 +2,7 @@
 
 namespace X\LaravelSwoolePool\Capsule;
 
+use Illuminate\Database\Connection;
 use X\LaravelSwoolePool\DatabaseManager;
 use Illuminate\Database\Capsule\Manager as BaseManager;
 use Illuminate\Database\Connectors\ConnectionFactory;
@@ -9,7 +10,7 @@ use Swoole\Event;
 
 class Manager extends BaseManager
 {
-    public function getAvailableConnection()
+    public function getAvailableConnection(): Connection
     {
         foreach($this->getDatabaseManager()->getConnections() as $connection)
         {
@@ -22,14 +23,14 @@ class Manager extends BaseManager
         }
     }
 
-    protected function setupManager()
+    protected function setupManager(): void
     {
         $factory = new ConnectionFactory($this->container);
 
         $this->manager = new DatabaseManager($this->container, $factory);
     }
 
-    public function addConnections(string $name, int $amount, array $config)
+    public function addConnections(string $name, int $amount, array $config): void
     {
         for($i = 0; $i < $amount; $i++)
         {
