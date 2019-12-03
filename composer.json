@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4": {
+            "X\\LaravelSwoolePool\\": "src/"
+        }
+    },
+    "require": {
+        "illuminate/database": "^6.6"
+    }
+}
