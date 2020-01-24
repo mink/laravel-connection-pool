@@ -43,10 +43,7 @@ class Manager extends BaseManager
                 $this->getDatabaseManager()->setDefaultConnection($connectionName);
             }
 
-            // todo - refactor
-            go(function() use($connectionName) {
-               $this->getConnection($connectionName) ;
-            });
+            $this->getConnection($connectionName);
         }
 
         Event::wait();
