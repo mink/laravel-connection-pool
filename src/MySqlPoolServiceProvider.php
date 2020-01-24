@@ -8,16 +8,6 @@ use Illuminate\Support\ServiceProvider;
 
 class MySqlPoolServiceProvider extends ServiceProvider
 {
-    /**
-     * Bootstrap the application events.
-     */
-    public function boot(): void
-    {
-        //
-    }
-    /**
-     * Register the service provider.
-     */
     public function register(): void
     {
         $this->app->singleton('db', fn($container) => new Manager($container));
