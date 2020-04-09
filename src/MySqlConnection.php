@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace X\LaravelSwoolePool;
+namespace X\LaravelConnectionPool;
 
 use Closure;
 use Illuminate\Database\MySqlConnection as BaseMySqlConnection;

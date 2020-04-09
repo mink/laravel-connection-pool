@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace X\LaravelSwoolePool;
+namespace X\LaravelConnectionPool;
 
 use Illuminate\Database\Connection;
 use Illuminate\Database\DatabaseManager as BaseDatabaseManager;

@@ -1,11 +1,11 @@
 {
-    "name": "x/laravel-swoole-pool",
-    "description": "Connection pooling for illuminate/database and the Swoole PHP Extension",
-    "keywords": ["laravel", "swoole", "database", "pool", "php", "async", "concurrency", "coroutine"],
-    "homepage": "https://github.com/mink/laravel-swoole-pool",
+    "name": "x/laravel-connection-pool",
+    "description": "Connection pooling for illuminate/database",
+    "keywords": ["laravel", "connection", "pooling", "database", "php", "async", "concurrency", "coroutine"],
+    "homepage": "https://github.com/mink/laravel-connection-pool",
     "autoload": {
         "psr-4": {
-            "X\\LaravelSwoolePool\\": "src/"
+            "X\\LaravelConnectionPool\\": "src/"
         }
     },
     "require": {
