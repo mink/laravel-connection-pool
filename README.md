@@ -1,10 +1,14 @@
-# Laravel Swoole Pool
+# Laravel Connection Pool
 
-Connection pooling for [illuminate/database](https://github.com/illuminate/database) and the [Swoole](https://github.com/swoole/swoole-src) PHP Extension.
+Laravel Connection Pool allows you to take advantage of [illuminate/database](https://github.com/illuminate/database) in an asynchronous environment.
 
-**Note:** This package is a proof of concept and is unsafe for use in production.
+**Note:** This package is a work in progress and is unsafe for use in production.
+
+### Requirements
+- PHP 7.4+
+- [Swoole](https://github.com/swoole/swoole-src) PHP extension
 
 ### Installation:
 ```
-composer require x/laravel-swoole-pool
+composer require x/laravel-connection-pool
 ```
