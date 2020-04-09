@@ -9,11 +9,9 @@ class Builder extends BaseBuilder
 {
     public function get($columns = ['*']): Collection
     {
-        $this->getConnection()->setActive(true);
-
         $query = parent::get($columns);
 
-        $this->getConnection()->setActive(false);
+        $this->getConnection()->active(false);
 
         return $query;
     }

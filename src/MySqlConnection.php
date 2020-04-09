@@ -23,7 +23,7 @@ class MySqlConnection extends BaseMySqlConnection
         return $this->active;
     }
 
-    public function setActive(bool $active): self
+    public function active(bool $active): self
     {
         $this->active = $active;
 

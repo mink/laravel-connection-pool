@@ -8,9 +8,17 @@ use Illuminate\Database\DatabaseManager as BaseDatabaseManager;
 class DatabaseManager extends BaseDatabaseManager
 {
     /**
+     * The active connection instances.
+     *
+     * @var array<MySqlConnection>
+     */
+    protected array $connections = [];
+
+    /**
      * Obtains an available connection and marks it as active.
      * The active state will be ignored if a connection name is declared.
-     * @param null $name
+     *
+     * @param string|null $name
      * @return Connection
      */
     public function connection($name = null): Connection
@@ -27,19 +35,18 @@ class DatabaseManager extends BaseDatabaseManager
         if($this->connections[$name]->isActive()) {
             foreach($this->connections as $connection) {
                 if(! $connection->isActive()) {
-                    $connection->setActive(true);
-                    return $connection;
+                    return $connection->active(true);
                 }
             }
         }
 
-        $this->connections[$name]->setActive(true);
-
-        return $this->connections[$name];
+        return $this->connections[$name]->active(true);
     }
 
     /**
      * Opens connections to every connection defined in the config
+     *
+     * @return void
      */
     public function makeConnections(): void
     {
