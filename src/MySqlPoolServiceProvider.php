@@ -2,29 +2,24 @@
 
 namespace X\LaravelSwoolePool;
 
-use X\LaravelSwoolePool\Capsule\Manager;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Connection;
 use Illuminate\Support\ServiceProvider;
 
 class MySqlPoolServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('db', fn($container) => new Manager($container));
-        $this->app->resolving('db', function ($db) {
-            $db->getDatabaseManager()->extend('mysql', function ($config, $name) {
-
-                $connection = $this->app->get('db')->getDatabaseManager()->getConnectionFactory()->make($config, $name);
-
-                $newConnection = new MySqlConnection(
-                    $connection->getPdo(),
-                    $connection->getDatabaseName(),
-                    $connection->getTablePrefix(),
-                    $config
-                );
-
-                return $newConnection;
-            });
-        });
+        Connection::resolverFor(
+            'mysql', fn (
+            $connection,
+            $database,
+            $prefix,
+            $config
+        ) => new MySqlConnection(
+            $connection,
+            $database,
+            $prefix,
+            $config
+        ));
     }
 }
