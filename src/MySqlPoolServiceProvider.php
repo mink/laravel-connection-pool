@@ -9,7 +9,22 @@ use Illuminate\Support\ServiceProvider;
 
 class MySqlPoolServiceProvider extends ServiceProvider
 {
+    /**
+     * Register any application services.
+     *
+     * @return void
+     */
     public function register(): void
+    {
+        $this->registerConnectionResolver();
+    }
+
+    /**
+     * Register the connection pool resolver.
+     *
+     * @return void
+     */
+    protected function registerConnectionResolver(): void
     {
         Connection::resolverFor(
             'mysql', fn (
