@@ -2,31 +2,57 @@
 
 namespace X\LaravelSwoolePool;
 
-use X\LaravelSwoolePool\Query\Builder;
+use Closure;
 use Illuminate\Database\MySqlConnection as BaseMySqlConnection;
 
 class MySqlConnection extends BaseMySqlConnection
 {
+    /**
+     * The active state of the connection.
+     *
+     * @var bool
+     */
     public bool $active = false;
 
-    public function query(): Builder
-    {
-        return new Builder(
-            $this,
-            $this->getQueryGrammar(),
-            $this->getPostProcessor()
-        );
-    }
-
+    /**
+     * Checks if the connection is currently being used.
+     *
+     * @return bool
+     */
     public function isActive(): bool
     {
         return $this->active;
     }
 
+    /**
+     * Marks the active state of the connection.
+     *
+     * @param bool $active
+     * @return $this
+     */
     public function active(bool $active): self
     {
         $this->active = $active;
 
         return $this;
+    }
+
+    /**
+     * Run a SQL statement and log its execution context.
+     *
+     * @param  string  $query
+     * @param  array  $bindings
+     * @param  Closure  $callback
+     * @return mixed
+     *
+     * @throws \Illuminate\Database\QueryException
+     */
+    protected function run($query, $bindings, Closure $callback)
+    {
+        $result = parent::run($query, $bindings, $callback);
+
+        $this->active = false;
+
+        return $result;
     }
 }
