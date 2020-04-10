@@ -10,13 +10,6 @@ use Illuminate\Database\DatabaseManager as BaseDatabaseManager;
 class DatabaseManager extends BaseDatabaseManager
 {
     /**
-     * The active connection instances.
-     *
-     * @var array<MySqlConnection>
-     */
-    protected array $connections = [];
-
-    /**
      * Obtains an available connection and marks it as active.
      * The active state will be ignored if a connection name is declared.
      *
