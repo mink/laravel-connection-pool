@@ -51,6 +51,8 @@ class MySqlConnection extends BaseMySqlConnection
      */
     protected function run($query, $bindings, Closure $callback)
     {
+        $this->active = true;
+
         $result = parent::run($query, $bindings, $callback);
 
         $this->active = false;
