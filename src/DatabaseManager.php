@@ -49,8 +49,6 @@ class DatabaseManager extends BaseDatabaseManager
         {
             [$database, $type] = $this->parseConnectionName($name);
 
-            $name = $name ?: $database;
-
             if(!isset($this->connections[$name])) {
                 $this->connections[$name] = $this->configure(
                     $this->makeConnection($database), $type
