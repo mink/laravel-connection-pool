@@ -47,4 +47,15 @@ class ConnectionTest extends TestCase
         // and is available to be used again.
         $this->assertFalse($connection->isActive());
     }
+
+    public function testConnectionHasLabels(): void
+    {
+        $connection = $this->app['db']->connection('mysql-1')
+            ->addLabel('test')
+            ->addLabel('another-label')
+            ->addLabel('DELETE_ME')
+            ->removeLabel('DELETE_ME');
+
+        $this->assertEquals(['test', 'another-label'], $connection->getLabels());
+    }
 }
