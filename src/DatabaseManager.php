@@ -36,9 +36,6 @@ class DatabaseManager extends BaseDatabaseManager
     public function __construct($app, ConnectionFactory $factory)
     {
         parent::__construct($app, $factory);
-
-        $this->minConnections = $app['config']->get('database.min_connections');
-        $this->maxConnections = $app['config']->get('database.max_connections');
     }
 
     /**
@@ -136,5 +133,51 @@ class DatabaseManager extends BaseDatabaseManager
                 }
             }
         }
+    }
+
+    /**
+     * Get the minimum connections.
+     *
+     * @return int
+     */
+    public function getMinConnections(): int
+    {
+        return $this->minConnections;
+    }
+
+    /**
+     * Set the minimum connections.
+     *
+     * @param int $minConnections
+     * @return $this
+     */
+    public function setMinConnections(int $minConnections): self
+    {
+        $this->minConnections = $minConnections;
+
+        return $this;
+    }
+
+    /**
+     * Get the maximum connections.
+     *
+     * @return int
+     */
+    public function getMaxConnections(): int
+    {
+        return $this->maxConnections;
+    }
+
+    /**
+     * Set the maximum connections.
+     *
+     * @param int $maxConnections
+     * @return $this
+     */
+    public function setMaxConnections(int $maxConnections): self
+    {
+        $this->maxConnections = $maxConnections;
+
+        return $this;
     }
 }
