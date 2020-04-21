@@ -56,12 +56,12 @@ class TestCase extends BaseTestCase
             ];
         }
         $app['config']->set('database.default', 'mysql-1');
-        // the minimum amount of connections required in the pool
-        $app['config']->set('database.min_connections', 2);
-        // the max amount of connections allowed in the pool
-        $app['config']->set('database.max_connections', 10);
-        $app['config']->set('database.max_connections', 10);
         $app['config']->set('database.connections', $connections);
+
+        // set the min & max connections allowed
+        $app['db']
+            ->setMinConnections(2)
+            ->setMaxConnections(10);
 
         // Create instances of each defined connection
         $app['db']->makeInitialConnections();
