@@ -41,12 +41,12 @@ class TestCase extends BaseTestCase
 
         $connections = [];
 
-        // create 20 mysql connections titled from "mysql-1" to "mysql-20"
+        // 20 mysql connections titled from "mysql-1" to "mysql-20"
         for($i = 0; $i < 20; $i++) {
             $connections['mysql-'.($i+1)] = [
                 'driver'    => 'mysql',
                 'host'      => env('DB_HOST'),
-                'port' => env('DB_PORT'),
+                'port'      => env('DB_PORT'),
                 'database'  => env('DB_DATABASE'),
                 'username'  => env('DB_USER'),
                 'password'  => env('DB_PASS'),
@@ -56,9 +56,14 @@ class TestCase extends BaseTestCase
             ];
         }
         $app['config']->set('database.default', 'mysql-1');
+        // the minimum amount of connections required in the pool
+        $app['config']->set('database.min_connections', 2);
+        // the max amount of connections allowed in the pool
+        $app['config']->set('database.max_connections', 10);
+        $app['config']->set('database.max_connections', 10);
         $app['config']->set('database.connections', $connections);
 
         // Create instances of each defined connection
-        $app['db']->makeConnections();
+        $app['db']->makeInitialConnections();
     }
 }

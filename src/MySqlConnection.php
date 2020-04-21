@@ -17,31 +17,31 @@ class MySqlConnection extends BaseMySqlConnection
     private array $labels = [];
 
     /**
-     * The active state of the connection.
+     * The state of the connection.
      *
-     * @var bool
+     * @var int
      */
-    public bool $active = false;
+    public int $state = DatabaseManager::STATE_NOT_IN_USE;
 
     /**
-     * Checks if the connection is currently being used.
+     * Gets the connection state.
      *
-     * @return bool
+     * @return int
      */
-    public function isActive(): bool
+    public function getState(): int
     {
-        return $this->active;
+        return $this->state;
     }
 
     /**
-     * Marks the active state of the connection.
+     * Sets the state of the connection.
      *
-     * @param bool $active
+     * @param int $state
      * @return $this
      */
-    public function active(bool $active): self
+    public function setState(int $state): self
     {
-        $this->active = $active;
+        $this->state = $state;
 
         return $this;
     }
@@ -96,11 +96,11 @@ class MySqlConnection extends BaseMySqlConnection
      */
     protected function run($query, $bindings, Closure $callback)
     {
-        $this->active = true;
+        $this->state = DatabaseManager::STATE_IN_USE;
 
         $result = parent::run($query, $bindings, $callback);
 
-        $this->active = false;
+        $this->state = DatabaseManager::STATE_NOT_IN_USE;
 
         return $result;
     }
