@@ -14,12 +14,22 @@ class DatabaseManager extends BaseDatabaseManager
     /** @var MySqlConnection[] */
     protected $connections = [];
 
-    protected int $maxConnections;
+    /** @var int */
     protected int $minConnections;
 
-    public const STATE_NOT_IN_USE = 0;
-    public const STATE_IN_USE = 1;
+    /** @var int */
+    protected int $maxConnections;
 
+    const STATE_NOT_IN_USE = 0;
+    const STATE_IN_USE = 1;
+
+    /**
+     * Create a new database manager instance with additional configuration.
+     *
+     * @param  mixed $app
+     * @param ConnectionFactory $factory
+     * @return void
+     */
     public function __construct($app, ConnectionFactory $factory)
     {
         parent::__construct($app, $factory);
@@ -28,6 +38,11 @@ class DatabaseManager extends BaseDatabaseManager
         $this->maxConnections = $app['config']->get('database.max_connections');
     }
 
+    /**
+     * Obtain all of the idle connections.
+     *
+     * @return array
+     */
     public function getIdleConnections(): array
     {
         return array_filter(
@@ -37,7 +52,7 @@ class DatabaseManager extends BaseDatabaseManager
     }
 
     /**
-     * Obtains an available connection and marks it as active.
+     * Obtains an idle connection and marks it as active.
      * The active state will be ignored if a connection name is declared.
      *
      * @param string|null $name
@@ -98,7 +113,7 @@ class DatabaseManager extends BaseDatabaseManager
     }
 
     /**
-     * Adds a new connection to the pool
+     * Adds a new connection to the pool.
      *
      * @throws Exception
      * @return void
