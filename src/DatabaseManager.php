@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace X\LaravelConnectionPool;
 
-use Exception;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Database\DatabaseManager as BaseDatabaseManager;
+use X\LaravelConnectionPool\Exceptions\{
+    ConnectionPoolFullException,
+    NoConnectionsAvailableException
+};
 
 class DatabaseManager extends BaseDatabaseManager
 {
@@ -91,7 +94,7 @@ class DatabaseManager extends BaseDatabaseManager
             }
         }
 
-        throw new Exception('There are no idle connections available');
+        throw new NoConnectionsAvailableException();
     }
 
     /**
@@ -129,7 +132,7 @@ class DatabaseManager extends BaseDatabaseManager
                     );
                     break;
                 } else {
-                    throw new Exception('Cannot make a new connection: Connection pool is full');
+                    throw new ConnectionPoolFullException();
                 }
             }
         }
