@@ -1,0 +1,20 @@
+dist: bionic
+
+services: mysql
+
+language: php
+php:
+  - 7.4
+
+install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS tests;'
+
+before_script:
+  - sudo apt update
+  - pecl install --onlyreqdeps --nobuild swoole-4.4.16 && cd "$(pecl config-get temp_dir)/swoole" && phpize && ./configure --enable-openssl && make && make install && cd $TRAVIS_BUILD_DIR
+  - sudo echo "extension=swoole.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - composer install --no-suggest --prefer-dist -n -o
+  - phpenv config-rm xdebug.ini
+
+script:
+  - vendor/bin/phpunit

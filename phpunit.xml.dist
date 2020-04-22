@@ -19,10 +19,10 @@
         </whitelist>
     </filter>
     <php>
-        <env name="DB_HOST" value="localhost"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="3306"/>
         <env name="DB_DATABASE" value="tests"/>
-        <env name="DB_USER" value="homestead"/>
-        <env name="DB_PASS" value="secret"/>
+        <env name="DB_USER" value="root"/>
+        <env name="DB_PASS" value=""/>
     </php>
 </phpunit>
