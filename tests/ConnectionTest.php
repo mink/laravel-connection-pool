@@ -98,5 +98,23 @@ class ConnectionTest extends TestCase
 
         // ..and that connection is "mysql-2"
         $this->assertEquals('mysql-2', array_key_first($this->app['db']->getConnections()));
+
+        // seeing as the connection is not in use
+        $this->assertEquals(DatabaseManager::STATE_NOT_IN_USE, $this->app['db']->getConnections()['mysql-2']->getState());
+
+        // ...when we grab a connection it should be "mysql-2" by default
+        $this->assertEquals('mysql-2', $this->app['db']->getName());
+
+        // what about another connection? it should grab "mysql-1" before "mysql-3", "mysql-4" etc.
+        $this->assertEquals('mysql-1', $this->app['db']->getName());
+
+        // and another? it should grab "mysql-3" and continue in that order
+        $this->assertEquals('mysql-3', $this->app['db']->getName());
+
+        // now let's close "mysql-2"
+        $this->app['db']->recycleConnection('mysql-2');
+
+        // want another connection? you'll get "mysql-2", the others are still marked as active
+        $this->assertEquals('mysql-2', $this->app['db']->getName());
     }
 }

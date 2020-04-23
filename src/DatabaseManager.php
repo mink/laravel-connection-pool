@@ -61,6 +61,17 @@ class DatabaseManager extends BaseDatabaseManager
      */
     public function connection($name = null): Connection
     {
+        // is there a connection we can use before we make a new one?
+        if($name === null) {
+            foreach($this->getIdleConnections() as $connection) {
+                // use the first available idle connection
+                // mark as active
+                return $connection->setState(self::STATE_IN_USE);
+            }
+        }
+
+        // obtain the connection by name, if it exists
+        // if no name is provided, it will create the a connection from the config
         $connection = parent::connection($name);
 
         // ignore "active" state if connection name is declared
