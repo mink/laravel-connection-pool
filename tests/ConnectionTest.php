@@ -86,4 +86,17 @@ class ConnectionTest extends TestCase
         // there should now be 4 connections in the pool
         $this->assertCount(4, $this->app['db']->getConnections());
     }
+
+    public function testConnectionRecycled(): void
+    {
+        // 2 connections by default: "mysql-1" and "mysql-2"
+        // let's remove connection "mysql-1"
+        $this->app['db']->recycleConnection('mysql-1');
+
+        // there should only be 1 connection available
+        $this->assertCount(1, $this->app['db']->getConnections());
+
+        // ..and that connection is "mysql-2"
+        $this->assertEquals('mysql-2', array_key_first($this->app['db']->getConnections()));
+    }
 }

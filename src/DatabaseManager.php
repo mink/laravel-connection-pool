@@ -135,6 +135,14 @@ class DatabaseManager extends BaseDatabaseManager
         }
     }
 
+    public function recycleConnection(string $name = null): void
+    {
+        if($this->connections[$name] !== null) {
+            $this->connections[$name]->disconnect();
+            unset($this->connections[$name]);
+        }
+    }
+
     /**
      * Get the minimum connections.
      *
