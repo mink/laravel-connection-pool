@@ -20,6 +20,8 @@
     "require-dev": {
         "phpunit/phpunit": "^9.1",
         "orchestra/testbench": "^5.1",
-        "swoole/ide-helper": "@dev"
+        "swoole/ide-helper": "@dev",
+        "ext-pdo": "*",
+        "ext-bcmath": "*"
     }
 }
