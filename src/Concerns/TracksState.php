@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace X\LaravelConnectionPool\Concerns;
 
 use Closure;
-use X\LaravelConnectionPool\DatabaseManager;
+use X\LaravelConnectionPool\MySqlConnection;
 
 trait TracksState
 {
@@ -14,7 +14,7 @@ trait TracksState
      *
      * @var int
      */
-    public int $state = DatabaseManager::STATE_NOT_IN_USE;
+    public int $state = MySqlConnection::STATE_NOT_IN_USE;
 
     /**
      * Gets the connection state.
@@ -51,11 +51,11 @@ trait TracksState
      */
     protected function run($query, $bindings, Closure $callback)
     {
-        $this->state = DatabaseManager::STATE_IN_USE;
+        $this->state = MySqlConnection::STATE_IN_USE;
 
         $result = parent::run($query, $bindings, $callback);
 
-        $this->state = DatabaseManager::STATE_NOT_IN_USE;
+        $this->state = MySqlConnection::STATE_NOT_IN_USE;
 
         return $result;
     }

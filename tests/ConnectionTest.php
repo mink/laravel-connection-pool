@@ -33,7 +33,7 @@ class ConnectionTest extends TestCase
 
         // The connection has been obtained, thus it is set to active
         // to prepare for execution. This is to better support unbuffered queries.
-        $this->assertTrue($connection->getState() === DatabaseManager::STATE_IN_USE);
+        $this->assertTrue($connection->getState() === MySqlConnection::STATE_IN_USE);
 
         $runtime = new Scheduler();
 
@@ -48,7 +48,7 @@ class ConnectionTest extends TestCase
 
         // The query has executed, so the connection is no longer in use
         // and is available to be used again.
-        $this->assertFalse($connection->getState() === DatabaseManager::STATE_IN_USE);
+        $this->assertFalse($connection->getState() === MySqlConnection::STATE_IN_USE);
     }
 
     public function testConnectionHasLabels(): void
@@ -76,7 +76,7 @@ class ConnectionTest extends TestCase
         // let's mark all 3 connections as active
         // this will force the pool to fetch a new connection automatically
         foreach($this->app['db']->getConnections() as $connection) {
-            $connection->setState(DatabaseManager::STATE_IN_USE);
+            $connection->setState(MySqlConnection::STATE_IN_USE);
         }
 
         // fetching a new connection, as the pool has no idle connections
@@ -100,7 +100,7 @@ class ConnectionTest extends TestCase
         $this->assertEquals('mysql-2', array_key_first($this->app['db']->getConnections()));
 
         // seeing as the connection is not in use
-        $this->assertEquals(DatabaseManager::STATE_NOT_IN_USE, $this->app['db']->getConnections()['mysql-2']->getState());
+        $this->assertEquals(MySqlConnection::STATE_NOT_IN_USE, $this->app['db']->getConnections()['mysql-2']->getState());
 
         // ...when we grab a connection it should be "mysql-2" by default
         $this->assertEquals('mysql-2', $this->app['db']->getName());
