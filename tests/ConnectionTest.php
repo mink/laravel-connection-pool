@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace X\LaravelConnectionPool\Tests;
 
 use Swoole\Coroutine\Scheduler;
-use X\LaravelConnectionPool\DatabaseManager;
+use Swoole\Event;
 use X\LaravelConnectionPool\MySqlConnection;
 
 class ConnectionTest extends TestCase
@@ -29,22 +29,20 @@ class ConnectionTest extends TestCase
     public function testConnectionActiveState(): void
     {
         /** @var MySqlConnection $connection */
+        /** @var MySqlConnection $connection */
         $connection = $this->app['db']->connection();
 
         // The connection has been obtained, thus it is set to active
         // to prepare for execution. This is to better support unbuffered queries.
         $this->assertTrue($connection->getState() === MySqlConnection::STATE_IN_USE);
 
-        $runtime = new Scheduler();
-
-        $runtime->add(function() use($connection) {
-            // Run an update query concurrently.
+        go(function() use($connection) {
             $connection->table('users')
                 ->where('name', 'Zac')
                 ->update(['password' => 'lol']);
         });
 
-        $runtime->start();
+        Event::wait();
 
         // The query has executed, so the connection is no longer in use
         // and is available to be used again.

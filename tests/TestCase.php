@@ -7,6 +7,8 @@ namespace X\LaravelConnectionPool\Tests;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Swoole\Event;
+use Swoole\Runtime;
 use X\LaravelConnectionPool\DatabaseManager;
 use X\LaravelConnectionPool\MySqlPoolServiceProvider;
 
@@ -14,19 +16,25 @@ class TestCase extends BaseTestCase
 {
     protected function setUp(): void
     {
-        parent::setUp();
+        Runtime::enableCoroutine();
 
-        Schema::dropIfExists('users');
+        go(function() {
+            parent::setUp();
 
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
+            Schema::dropIfExists('users');
+
+            Schema::create('users', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->string('email')->unique();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password');
+                $table->rememberToken();
+                $table->timestamps();
+            });
         });
+
+        Event::wait();
     }
 
     protected function getPackageProviders($app)
