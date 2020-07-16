@@ -8,6 +8,7 @@ use Swoole\Coroutine\Scheduler;
 use Swoole\Event;
 use Swoole\Runtime;
 use X\LaravelConnectionPool\MySqlConnection;
+use X\LaravelConnectionPool\Tests\Models\User;
 
 class ConcurrencyTest extends TestCase
 {
@@ -17,11 +18,11 @@ class ConcurrencyTest extends TestCase
 
         $timeStarted = microtime(true);
 
-        // complete x5 1s sleep queries concurrently
+        // complete x10 1s sleep queries concurrently
         // should take ~1s to execute
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             go(function () use($i) {
-                $this->app['db']->connection('mysql-' . ($i + 1))->getPdo()->query('SELECT SLEEP(1)');
+                $this->app['db']->connection()->getPdo()->query('SELECT SLEEP(1)');
             });
         }
 
@@ -29,7 +30,7 @@ class ConcurrencyTest extends TestCase
 
         $timeFinished = microtime(true);
 
-        // asserting that the execution of all 5 queries took under 1.1s
+        // asserting that the execution of all 10 queries took under 1.1s
         $this->assertTrue(
             bccomp("1.1", strval($timeFinished - $timeStarted), 3) === 1
         );
