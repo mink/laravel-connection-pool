@@ -35,7 +35,6 @@ trait TracksState
     public function setState(int $state): self
     {
         $this->state = $state;
-
         return $this;
     }
 
@@ -52,11 +51,8 @@ trait TracksState
     protected function run($query, $bindings, Closure $callback)
     {
         $this->state = MySqlConnection::STATE_IN_USE;
-
         $result = parent::run($query, $bindings, $callback);
-
         $this->state = MySqlConnection::STATE_NOT_IN_USE;
-
         return $result;
     }
 }

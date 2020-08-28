@@ -32,7 +32,6 @@ trait HasLabels
     public function addLabel(string $label): self
     {
         $this->labels[] =  $label;
-
         return $this;
     }
 
@@ -44,10 +43,7 @@ trait HasLabels
      */
     public function removeLabel(string $labelToRemove): self
     {
-        $this->labels = array_filter($this->labels, function($label) use($labelToRemove) {
-            return $label !== $labelToRemove;
-        });
-
+        $this->labels = array_filter($this->labels, fn($label) => $label !== $labelToRemove);
         return $this;
     }
 }
