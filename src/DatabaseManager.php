@@ -15,9 +15,6 @@ use X\LaravelConnectionPool\Exceptions\{
 
 class DatabaseManager extends BaseDatabaseManager
 {
-    /** @var MySqlConnection[] */
-    protected array $connections = [];
-
     /** @var int */
     protected int $minConnections;
 
