@@ -8,6 +8,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Database\DatabaseManager as BaseDatabaseManager;
 use X\LaravelConnectionPool\Exceptions\{
+    ConnectionNotFoundException,
     ConnectionPoolFullException,
     NoConnectionsAvailableException
 };
@@ -53,14 +54,14 @@ class DatabaseManager extends BaseDatabaseManager
      * The active state will be ignored if a connection name is declared.
      *
      * @param string|null $name
-     * @throws Exception
+     * @throws ConnectionPoolFullException|NoConnectionsAvailableException
      * @return Connection
      */
     public function connection($name = null): Connection
     {
         // is there a connection we can use before we make a new one?
-        if($name === null) {
-            foreach($this->getIdleConnections() as $connection) {
+        if ($name === null) {
+            foreach ($this->getIdleConnections() as $connection) {
                 // use the first available idle connection
                 // mark as active
                 return $connection->setState(MySqlConnection::STATE_IN_USE);
@@ -72,29 +73,29 @@ class DatabaseManager extends BaseDatabaseManager
         $connection = parent::connection($name);
 
         // ignore "active" state if connection name is declared
-        if($name) {
+        if ($name) {
             return $connection;
         }
 
         $name = $connection->getName();
 
         // is the selected connection idle?
-        if($this->connections[$name]->getState() === MySqlConnection::STATE_NOT_IN_USE) {
+        if ($this->connections[$name]->getState() === MySqlConnection::STATE_NOT_IN_USE) {
             return $this->connections[$name]->setState(MySqlConnection::STATE_IN_USE);
         }
 
-        foreach($this->getIdleConnections() as $connection) {
+        foreach ($this->getIdleConnections() as $connection) {
             // use the first available idle connection
             // mark as active
             return $connection->setState(MySqlConnection::STATE_IN_USE);
         }
 
         // no idle connections found, create a new connection if allowed
-        if(count($this->connections) < $this->maxConnections) {
+        if (count($this->connections) < $this->maxConnections) {
             $this->makeNewConnection();
             // go through the idle connections again
             // this connection should be here
-            foreach($this->getIdleConnections() as $connection) {
+            foreach ($this->getIdleConnections() as $connection) {
                 return $connection->setState(MySqlConnection::STATE_IN_USE);
             }
         }
@@ -110,9 +111,9 @@ class DatabaseManager extends BaseDatabaseManager
      */
     public function makeInitialConnections(): void
     {
-        foreach($this->app['config']['database.connections'] as $name => $connection) {
+        foreach ($this->app['config']['database.connections'] as $name => $connection) {
             [$database, $type] = $this->parseConnectionName($name);
-            if(!isset($this->connections[$name]) && count($this->connections) < $this->minConnections) {
+            if (!isset($this->connections[$name]) && count($this->connections) < $this->minConnections) {
                 $this->connections[$name] = $this->configure(
                     $this->makeConnection($database), $type
                 );
@@ -123,15 +124,15 @@ class DatabaseManager extends BaseDatabaseManager
     /**
      * Adds a new connection to the pool.
      *
-     * @throws Exception
+     * @throws ConnectionPoolFullException
      * @return void
      */
     public function makeNewConnection(): void
     {
-        foreach($this->app['config']['database.connections'] as $name => $connection) {
+        foreach ($this->app['config']['database.connections'] as $name => $connection) {
             [$database, $type] = $this->parseConnectionName($name);
-            if(!isset($this->connections[$name])) {
-                if(count($this->connections) < $this->maxConnections) {
+            if (!isset($this->connections[$name])) {
+                if (count($this->connections) < $this->maxConnections) {
                     $this->connections[$name] = $this->configure(
                         $this->makeConnection($database), $type
                     );
@@ -143,12 +144,21 @@ class DatabaseManager extends BaseDatabaseManager
         }
     }
 
-    public function recycleConnection(string $name = null): void
+    /**
+     * Recycle a connection by name from the pool.
+     *
+     * @param string $name
+     * @throws ConnectionNotFoundException
+     * @return void
+     */
+    public function recycleConnection(string $name): void
     {
-        if($this->connections[$name] !== null) {
-            $this->connections[$name]->disconnect();
-            unset($this->connections[$name]);
+        if (!$this->connections[$name]) {
+            throw new ConnectionNotFoundException();
         }
+
+        $this->connections[$name]->disconnect();
+        unset($this->connections[$name]);
     }
 
     /**
@@ -170,7 +180,6 @@ class DatabaseManager extends BaseDatabaseManager
     public function setMinConnections(int $minConnections): self
     {
         $this->minConnections = $minConnections;
-
         return $this;
     }
 
@@ -193,7 +202,6 @@ class DatabaseManager extends BaseDatabaseManager
     public function setMaxConnections(int $maxConnections): self
     {
         $this->maxConnections = $maxConnections;
-
         return $this;
     }
 }

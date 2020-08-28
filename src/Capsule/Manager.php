@@ -18,7 +18,6 @@ class Manager extends BaseManager
     protected function setupManager(): void
     {
         $factory = new ConnectionFactory($this->container);
-
         $this->manager = new DatabaseManager($this->container, $factory);
     }
 }
