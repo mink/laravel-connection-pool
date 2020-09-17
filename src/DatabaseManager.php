@@ -108,6 +108,11 @@ class DatabaseManager extends BaseDatabaseManager
      */
     public function makeInitialConnections(): void
     {
+        // recycle existing connections if any
+        foreach ($this->connections as $connection) {
+            $this->recycleConnection($connection->getName());
+        }
+
         foreach ($this->app['config']['database.connections'] as $name => $connection) {
             [$database, $type] = $this->parseConnectionName($name);
             if (!isset($this->connections[$name]) && count($this->connections) < $this->minConnections) {
