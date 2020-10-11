@@ -39,7 +39,7 @@ class ConnectionTest extends TestCase
         go(function () use($connection) {
             $connection->table('users')
                 ->where('name', 'Zac')
-                ->update(['password' => 'lol']);
+                ->update(['name' => 'test']);
         });
 
         Event::wait();

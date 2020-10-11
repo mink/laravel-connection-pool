@@ -6,7 +6,9 @@ namespace X\LaravelConnectionPool\Tests;
 
 use Swoole\Event;
 use Swoole\Runtime;
+use X\LaravelConnectionPool\DatabaseManager;
 use X\LaravelConnectionPool\Exceptions\NoConnectionsAvailableException;
+use X\LaravelConnectionPool\Tests\Models\User;
 
 class ConcurrencyTest extends TestCase
 {
@@ -57,5 +59,39 @@ class ConcurrencyTest extends TestCase
 
         // asserting that no connections were available to perform at least one of the queries
         $this->assertTrue($exception);
+    }
+
+    public function testConcurrentModelQueries(): void
+    {
+        Runtime::enableCoroutine();
+
+        // initially there are 2 connections
+        $this->assertCount(2, $this->app->get('db')->getConnections());
+
+        // create 10 users at once
+        for ($i = 0; $i < 10; $i++) {
+            go(function () {
+                $user = new User();
+                $user->name = 'Zac';
+                try {
+                    $user->save();
+                } catch(NoConnectionsAvailableException $e) {
+                    // user didnt save, fail
+                }
+                // check that the user was created
+                $this->assertNotNull($user->id);
+            });
+        }
+
+        Event::wait();
+
+        // 10 users created at once, therefore should be 10 connections open
+        $this->assertCount(10, $this->app->get('db')->getConnections());
+
+        // recycle existing connections and open the initial minimum 2
+        $this->app->get('db')->makeInitialConnections();
+
+        // should be 2 connections again
+        $this->assertCount(2, $this->app->get('db')->getConnections());
     }
 }
