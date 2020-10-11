@@ -10,6 +10,7 @@ use Illuminate\Database\MySqlConnection as BaseMySqlConnection;
 class MySqlConnection extends BaseMySqlConnection
 {
     use Concerns\HasLabels;
+    use Concerns\HasDatabaseManager;
     use Concerns\TracksState;
 
     /**

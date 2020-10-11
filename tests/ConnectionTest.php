@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace X\LaravelConnectionPool\Tests;
 
+use Illuminate\Support\Facades\DB;
+use Swoole\Event;
+use Swoole\Runtime;
 use X\LaravelConnectionPool\ConnectionState;
 use X\LaravelConnectionPool\MySqlConnection;
 
@@ -57,5 +60,39 @@ class ConnectionTest extends TestCase
 
         // there should now be 4 connections in the pool
         $this->assertCount(4, $this->app['db']->getConnections());
+    }
+
+    /**
+     * Tests that the connection switches to another
+     * when the initial connection is in use.
+     *
+     * @return void
+     */
+    public function testConnectionSwitchWhenActive(): void
+    {
+        Runtime::enableCoroutine();
+
+        $timeStarted = microtime(true);
+
+        go(function () {
+            // set the current connection's state to "in use", so it can't be used
+            $connection = $this->app->get('db')
+                ->connection()
+                ->setState(ConnectionState::IN_USE);
+            // the query will automatically be performed on a different connection
+            $connection->query()
+                ->select(DB::raw('SLEEP(1)'))
+                ->get();
+        });
+
+        Event::wait();
+
+        $timeFinished = microtime(true);
+
+        // asserting that the execution of the query took ~1s
+        // the query should execute, it will look for another available connection
+        $this->assertTrue(
+            bccomp("1.1", strval($timeFinished - $timeStarted), 3) === 1
+        );
     }
 }

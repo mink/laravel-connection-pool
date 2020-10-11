@@ -28,17 +28,20 @@ class MySqlPoolServiceProvider extends ServiceProvider
     protected function registerConnectionResolver(): void
     {
         // todo - PDO or closure
-        Connection::resolverFor(
-            'mysql', fn (
+        Connection::resolverFor('mysql', function (
             Closure $connection,
             string  $database,
             string  $prefix,
             array   $config
-        ) => new MySqlConnection(
-            $connection,
-            $database,
-            $prefix,
-            $config
-        ));
+        ) {
+            /** @var DatabaseManager $manager */
+            $manager = $this->app->get('db');
+            return (new MySqlConnection(
+                $connection,
+                $database,
+                $prefix,
+                $config,
+            ))->setDatabaseManager($manager);
+        });
     }
 }
