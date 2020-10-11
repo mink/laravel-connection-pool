@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace X\LaravelConnectionPool;
 
-use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Database\DatabaseManager as BaseDatabaseManager;
 use X\LaravelConnectionPool\Exceptions\{
     ConnectionNotFoundException,
@@ -85,7 +84,7 @@ class DatabaseManager extends BaseDatabaseManager
             foreach ($this->getIdleConnections() as $connection) {
                 // use the first available idle connection
                 // mark as active
-                return $connection->setState(ConnectionState::IN_USE);
+                return $connection;
             }
         }
 
@@ -103,13 +102,13 @@ class DatabaseManager extends BaseDatabaseManager
 
         // is the selected connection idle?
         if (isset($this->connections[$name]) && $this->connections[$name]->getState() === ConnectionState::NOT_IN_USE) {
-            return $this->connections[$name]->setState(ConnectionState::IN_USE);
+            return $this->connections[$name];
         }
 
         foreach ($this->getIdleConnections() as $connection) {
             // use the first available idle connection
             // mark as active
-            return $connection->setState(ConnectionState::IN_USE);
+            return $connection;
         }
 
         // no idle connections found, create a new connection if allowed
@@ -118,7 +117,7 @@ class DatabaseManager extends BaseDatabaseManager
             // go through the idle connections again
             // this connection should be here
             foreach ($this->getIdleConnections() as $connection) {
-                return $connection->setState(ConnectionState::IN_USE);
+                return $connection;
             }
         }
 

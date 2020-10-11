@@ -50,10 +50,18 @@ trait TracksState
      */
     protected function run($query, $bindings, Closure $callback)
     {
-        $this->state = ConnectionState::IN_USE;
-        /** @var bool $result */
-        $result = parent::run($query, $bindings, $callback);
-        $this->state = ConnectionState::NOT_IN_USE;
+        if ($this->getState() === ConnectionState::NOT_IN_USE) {
+            $this->setState(ConnectionState::IN_USE);
+            $result = parent::run($query, $bindings, $callback);
+            $this->state = ConnectionState::NOT_IN_USE;
+            return $result;
+        }
+
+        $connection = app('db')->connection();
+        // don't set state, the new connection has this same method
+        // and doesn't call parent.. so it will do the above state check
+        $result = $connection->run($query, $bindings, $callback);
+        $connection->setState(ConnectionState::NOT_IN_USE);
         return $result;
     }
 }

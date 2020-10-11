@@ -4,31 +4,25 @@ declare(strict_types=1);
 
 namespace X\LaravelConnectionPool\Concerns;
 
+use Illuminate\Database\Eloquent\Model;
 use X\LaravelConnectionPool\ConnectionState;
 
 trait IsThreadSafe
 {
     /**
-     * Save the model to the database.
-     * The model will obtain a fresh connection to perform the update.
+     * Assigns event listeners to ensure an idle connection is used.
      *
-     * @param  array  $options
-     * @return bool
+     * @return void
      */
-    public function save(array $options = [])
+    protected static function booted(): void
     {
-        // todo - make connection not in use before this save call is made
-        $this->getConnection()->setState(ConnectionState::NOT_IN_USE);
+        static::saving(function (Model $model) {
+            $model->getConnection()->setState(ConnectionState::NOT_IN_USE);
+            $model->setConnection(static::resolveConnection()->getName());
+        });
 
-        // obtain fresh connection from pool
-        $this->setConnection(static::resolveConnection()->getName());
-
-        // perform save
-        $result = parent::save($options);
-
-        // free connection to pool
-        $this->getConnection()->setState(ConnectionState::NOT_IN_USE);
-
-        return $result;
+        static::saved(function (Model $model) {
+            $model->getConnection()->setState(ConnectionState::NOT_IN_USE);
+        });
     }
 }
