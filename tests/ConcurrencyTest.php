@@ -45,7 +45,7 @@ class ConcurrencyTest extends TestCase
         for ($i = 0; $i < 11; $i++) {
             go(function () use($i, &$exception) {
                 try {
-                    if (!$exception) {
+                    if (! $exception) {
                         $this->app['db']->connection()->getPdo()->query('SELECT SLEEP(1)');
                     }
                 } catch(NoConnectionsAvailableException $e) {

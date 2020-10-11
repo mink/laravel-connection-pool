@@ -42,7 +42,7 @@ class DatabaseManager extends BaseDatabaseManager
     {
         return array_filter(
             $this->connections,
-            fn(MySqlConnection $connection) => $connection->getState() == MySqlConnection::STATE_NOT_IN_USE
+            fn (MySqlConnection $connection) => $connection->getState() == ConnectionState::NOT_IN_USE
         );
     }
 
@@ -61,7 +61,7 @@ class DatabaseManager extends BaseDatabaseManager
             foreach ($this->getIdleConnections() as $connection) {
                 // use the first available idle connection
                 // mark as active
-                return $connection->setState(MySqlConnection::STATE_IN_USE);
+                return $connection->setState(ConnectionState::IN_USE);
             }
         }
 
@@ -77,14 +77,14 @@ class DatabaseManager extends BaseDatabaseManager
         $name = $connection->getName();
 
         // is the selected connection idle?
-        if ($this->connections[$name]->getState() === MySqlConnection::STATE_NOT_IN_USE) {
-            return $this->connections[$name]->setState(MySqlConnection::STATE_IN_USE);
+        if ($this->connections[$name]->getState() === ConnectionState::NOT_IN_USE) {
+            return $this->connections[$name]->setState(ConnectionState::IN_USE);
         }
 
         foreach ($this->getIdleConnections() as $connection) {
             // use the first available idle connection
             // mark as active
-            return $connection->setState(MySqlConnection::STATE_IN_USE);
+            return $connection->setState(ConnectionState::IN_USE);
         }
 
         // no idle connections found, create a new connection if allowed
@@ -93,7 +93,7 @@ class DatabaseManager extends BaseDatabaseManager
             // go through the idle connections again
             // this connection should be here
             foreach ($this->getIdleConnections() as $connection) {
-                return $connection->setState(MySqlConnection::STATE_IN_USE);
+                return $connection->setState(ConnectionState::IN_USE);
             }
         }
 
