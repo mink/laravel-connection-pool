@@ -14,7 +14,7 @@ use X\LaravelConnectionPool\Exceptions\{
 class DatabaseManager extends BaseDatabaseManager
 {
     /**
-     * @var array<array-key, MySqlConnection>
+     * @var MySqlConnection[]
      */
     protected $connections = [];
 
@@ -24,19 +24,19 @@ class DatabaseManager extends BaseDatabaseManager
      *
      * @var int
      */
-    protected int $minConnections = 1;
+    protected int $minConnections = 0;
 
     /**
      * The maximum amount of connections allowed in the pool.
      *
      * @var int
      */
-    protected int $maxConnections = 1;
+    protected int $maxConnections = 0;
 
     /**
-     * Obtain a$ll of the idle connections.
+     * Obtain all of the idle connections.
      *
-     * @return array<array-key, MySqlConnection>
+     * @return MySqlConnection[]
      */
     public function getIdleConnections(): array
     {
@@ -49,7 +49,7 @@ class DatabaseManager extends BaseDatabaseManager
     /**
      * Return all of the created connections.
      *
-     * @return array<array-key, MySqlConnection>
+     * @return MySqlConnection[]
      */
     public function getConnections(): array
     {
@@ -173,7 +173,7 @@ class DatabaseManager extends BaseDatabaseManager
          */
         foreach ($config->get('database.connections') as $name => $connection) {
             [$database, $type] = $this->parseConnectionName($name);
-            if (!isset($this->connections[$name])) {
+            if (! isset($this->connections[$name])) {
                 if (count($this->connections) < $this->maxConnections) {
                     /** @var MySqlConnection $newConnection */
                     $newConnection = $this->configure(
