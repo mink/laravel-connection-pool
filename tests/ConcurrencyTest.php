@@ -12,6 +12,11 @@ use X\LaravelConnectionPool\Tests\Models\User;
 
 class ConcurrencyTest extends TestCase
 {
+    /**
+     * Tests if long running queries successfully run concurrently.
+     *
+     * @return void
+     */
     public function testConcurrentSleepQueries(): void
     {
         Runtime::enableCoroutine();
@@ -40,6 +45,12 @@ class ConcurrencyTest extends TestCase
         );
     }
 
+    /**
+     * Tests if an exception is thrown when there are not enough
+     * connections for several long running queries.
+     *
+     * @return void
+     */
     public function testConcurrentQueriesWhenNotEnoughConnections(): void
     {
         Runtime::enableCoroutine();
@@ -69,6 +80,11 @@ class ConcurrencyTest extends TestCase
         $this->assertTrue($exception);
     }
 
+    /**
+     * Tests if Eloquent models can save contents concurrently.
+     *
+     * @return void
+     */
     public function testConcurrentModelSaveQueries(): void
     {
         Runtime::enableCoroutine();
@@ -109,6 +125,11 @@ class ConcurrencyTest extends TestCase
         $this->assertCount(2, $this->app->get('db')->getConnections());
     }
 
+    /**
+     * Tests if Eloquent models can select contents concurrently.
+     *
+     * @return void
+     */
     public function testConcurrentModelSelectQueries(): void
     {
         Runtime::enableCoroutine();
