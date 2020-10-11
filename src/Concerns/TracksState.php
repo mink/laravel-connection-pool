@@ -51,6 +51,7 @@ trait TracksState
     protected function run($query, $bindings, Closure $callback)
     {
         $this->state = ConnectionState::IN_USE;
+        /** @var bool $result */
         $result = parent::run($query, $bindings, $callback);
         $this->state = ConnectionState::NOT_IN_USE;
         return $result;

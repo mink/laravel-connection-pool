@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace X\LaravelConnectionPool;
 
+use Closure;
 use Illuminate\Database\Connection;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,12 +27,13 @@ class MySqlPoolServiceProvider extends ServiceProvider
      */
     protected function registerConnectionResolver(): void
     {
+        // todo - PDO or closure
         Connection::resolverFor(
             'mysql', fn (
-            $connection,
-            $database,
-            $prefix,
-            $config
+            Closure $connection,
+            string  $database,
+            string  $prefix,
+            array   $config
         ) => new MySqlConnection(
             $connection,
             $database,

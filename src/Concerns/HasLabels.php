@@ -43,7 +43,7 @@ trait HasLabels
      */
     public function removeLabel(string $labelToRemove): self
     {
-        $this->labels = array_filter($this->labels, fn($label) => $label !== $labelToRemove);
+        $this->labels = array_filter($this->labels, fn ($label) => $label !== $labelToRemove);
         return $this;
     }
 }

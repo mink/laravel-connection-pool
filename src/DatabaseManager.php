@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace X\LaravelConnectionPool;
 
-use Illuminate\Database\Connection;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Database\DatabaseManager as BaseDatabaseManager;
 use X\LaravelConnectionPool\Exceptions\{
@@ -15,28 +14,30 @@ use X\LaravelConnectionPool\Exceptions\{
 
 class DatabaseManager extends BaseDatabaseManager
 {
-    /** @var int */
-    protected int $minConnections;
-
-    /** @var int */
-    protected int $maxConnections;
-
     /**
-     * Create a new database manager instance with additional configuration.
-     *
-     * @param  mixed $app
-     * @param ConnectionFactory $factory
-     * @return void
+     * @var array<array-key, MySqlConnection>
      */
-    public function __construct($app, ConnectionFactory $factory)
-    {
-        parent::__construct($app, $factory);
-    }
+    protected $connections = [];
 
     /**
-     * Obtain all of the idle connections.
+     * The minimum amount of connections to be in the pool.
+     * This amount of connections will be present in the pool at all times.
      *
-     * @return array
+     * @var int
+     */
+    protected int $minConnections = 1;
+
+    /**
+     * The maximum amount of connections allowed in the pool.
+     *
+     * @var int
+     */
+    protected int $maxConnections = 1;
+
+    /**
+     * Obtain a$ll of the idle connections.
+     *
+     * @return array<array-key, MySqlConnection>
      */
     public function getIdleConnections(): array
     {
@@ -47,14 +48,37 @@ class DatabaseManager extends BaseDatabaseManager
     }
 
     /**
+     * Return all of the created connections.
+     *
+     * @return array<array-key, MySqlConnection>
+     */
+    public function getConnections(): array
+    {
+        return $this->connections;
+    }
+
+    /**
+     * Add a connection.
+     *
+     * @param string $name
+     * @param MySqlConnection $connection
+     * @return $this
+     */
+    public function addConnection(string $name, MySqlConnection $connection): self
+    {
+        $this->connections[$name] = $connection;
+        return $this;
+    }
+
+    /**
      * Obtains an idle connection and marks it as active.
      * The active state will be ignored if a connection name is declared.
      *
      * @param string|null $name
      * @throws ConnectionPoolFullException|NoConnectionsAvailableException
-     * @return Connection
+     * @return MySqlConnection
      */
-    public function connection($name = null): Connection
+    public function connection($name = null): MySqlConnection
     {
         // is there a connection we can use before we make a new one?
         if ($name === null) {
@@ -67,6 +91,7 @@ class DatabaseManager extends BaseDatabaseManager
 
         // obtain the connection by name, if it exists
         // if no name is provided, it will create the a connection from the config
+        /** @var MySqlConnection $connection */
         $connection = parent::connection($name);
 
         // ignore "active" state if connection name is declared
@@ -77,7 +102,7 @@ class DatabaseManager extends BaseDatabaseManager
         $name = $connection->getName();
 
         // is the selected connection idle?
-        if ($this->connections[$name]->getState() === ConnectionState::NOT_IN_USE) {
+        if (isset($this->connections[$name]) && $this->connections[$name]->getState() === ConnectionState::NOT_IN_USE) {
             return $this->connections[$name]->setState(ConnectionState::IN_USE);
         }
 
@@ -113,12 +138,21 @@ class DatabaseManager extends BaseDatabaseManager
             $this->recycleConnection($connection->getName());
         }
 
-        foreach ($this->app['config']['database.connections'] as $name => $connection) {
+        /** @var \Illuminate\Config\Repository $config */
+        $config = $this->app->get('config');
+
+        /**
+         * @var string $name
+         * @var MySqlConnection $connection
+         */
+        foreach ($config->get('database.connections') as $name => $connection) {
             [$database, $type] = $this->parseConnectionName($name);
-            if (!isset($this->connections[$name]) && count($this->connections) < $this->minConnections) {
-                $this->connections[$name] = $this->configure(
-                    $this->makeConnection($database), $type
+            if (! isset($this->connections[$name]) && count($this->connections) < $this->minConnections) {
+                /** @var MySqlConnection $newConnection */
+                $newConnection = $this->configure(
+                    $this->makeConnection((string) $database), $type
                 );
+                $this->addConnection($name, $newConnection);
             }
         }
     }
@@ -131,13 +165,22 @@ class DatabaseManager extends BaseDatabaseManager
      */
     public function makeNewConnection(): void
     {
-        foreach ($this->app['config']['database.connections'] as $name => $connection) {
+        /** @var \Illuminate\Config\Repository $config */
+        $config = $this->app->get('config');
+
+        /**
+         * @var string $name
+         * @var MySqlConnection $connection
+         */
+        foreach ($config->get('database.connections') as $name => $connection) {
             [$database, $type] = $this->parseConnectionName($name);
             if (!isset($this->connections[$name])) {
                 if (count($this->connections) < $this->maxConnections) {
-                    $this->connections[$name] = $this->configure(
-                        $this->makeConnection($database), $type
+                    /** @var MySqlConnection $newConnection */
+                    $newConnection = $this->configure(
+                        $this->makeConnection((string) $database), $type
                     );
+                    $this->addConnection($name, $newConnection);
                     break;
                 } else {
                     throw new ConnectionPoolFullException();
@@ -149,13 +192,13 @@ class DatabaseManager extends BaseDatabaseManager
     /**
      * Recycle a connection by name from the pool.
      *
-     * @param string $name
+     * @param  ?string $name
      * @throws ConnectionNotFoundException
      * @return void
      */
-    public function recycleConnection(string $name): void
+    public function recycleConnection(string $name = null): void
     {
-        if (!$this->connections[$name]) {
+        if (! isset($this->connections[$name])) {
             throw new ConnectionNotFoundException();
         }
 

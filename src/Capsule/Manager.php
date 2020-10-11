@@ -8,11 +8,13 @@ use Illuminate\Database\Capsule\Manager as BaseManager;
 use Illuminate\Database\Connectors\ConnectionFactory;
 use X\LaravelConnectionPool\DatabaseManager;
 
+/** @psalm-suppress PropertyNotSetInConstructor */
 class Manager extends BaseManager
 {
     /**
      * Build the database manager instance.
      *
+     * @psalm-suppress ArgumentTypeCoercion
      * @return void
      */
     protected function setupManager(): void
