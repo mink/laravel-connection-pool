@@ -14,3 +14,27 @@ Laravel Connection Pool allows you to take advantage of Laravel's [query builder
 ```
 composer require x/laravel-connection-pool
 ```
+
+### Usage
+
+```php
+// concurrent operations
+go(fn () => Server::where('terminated_at', '<=', now()->subMinutes(5))->delete());
+
+go(function () {
+    Session::where('active', true)->get()->each(function ($session) {
+        //
+    });
+});
+
+Swoole\Event::wait();
+```
+
+```php
+// run 100 SLEEP(1) queries at once, takes ~1s
+for ($i = 0; $i < 100; $i++) {
+    go(fn () => DB::statement('SELECT SLEEP(1)'));
+}
+
+Swoole\Event::wait();
+```
